@@ -1,0 +1,13 @@
+# github.com/PuerkitoBio/goquery v1.6.0
+## explicit; go 1.13
+github.com/PuerkitoBio/goquery
+# github.com/andybalholm/cascadia v1.1.0
+## explicit
+github.com/andybalholm/cascadia
+# github.com/pawanpaudel93/go-tiktok-downloader v0.0.0-20220317110311-958271c8cead
+## explicit; go 1.15
+github.com/pawanpaudel93/go-tiktok-downloader/tiktok
+# golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+## explicit; go 1.11
+golang.org/x/net/html
+golang.org/x/net/html/atom
