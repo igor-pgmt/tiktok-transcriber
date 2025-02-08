@@ -1,0 +1,12 @@
+# IDE
+/.idea
+/.vscode
+
+# system files
+.DS_Store
+
+# vendor
+/vendor
+
+# results files
+/results

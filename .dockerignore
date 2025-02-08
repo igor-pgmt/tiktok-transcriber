@@ -4,5 +4,6 @@ __pycache__
 *.pyo
 *.pyd
 .env
+.DS_Store
 # Убедитесь, что videos НЕ игнорируется
 # videos/

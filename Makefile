@@ -1,21 +1,21 @@
-# Makefile
+.PHONY: all build up run down clean
 
-.PHONY: all build run clean
-
-# Имена образов
+# Image names
+DOWNLOADER_IMAGE = kalandar5862/video-downloader
 AUDIO_EXTRACTOR_IMAGE = audio_extractor
 TRANSCRIBER_IMAGE = transcriber
 MAIN_SERVICE_IMAGE = main_service
 
-# Имена контейнеров
+# Container names
+DOWNLOADER_CONTAINER = downloader_container
 AUDIO_EXTRACTOR_CONTAINER = audio_extractor_container
 TRANSCRIBER_CONTAINER = transcriber_container
 MAIN_SERVICE_CONTAINER = main_service_container
 
-# Имя пользовательской сети
+# Custom network name
 NETWORK = transcriber_network
 
-# Сборка всех образов
+# Build all images
 build: build-audio-extractor build-transcriber build-main-service
 
 build-audio-extractor:
@@ -27,41 +27,68 @@ build-transcriber:
 build-main-service:
 	docker build -t $(MAIN_SERVICE_IMAGE) ./main_service
 
-# Создание сети
+# Create network if it doesn't exist
 create-network:
-	docker network create $(NETWORK) || true
+	@docker network inspect $(NETWORK) > /dev/null 2>&1 || \
+		docker network create $(NETWORK)
 
-# Запуск всех контейнеров
-run: build create-network
-	# Запускаем Audio Extractor с монтированием папки videos
+# Start all containers
+up: create-network
+	# Start Audio Extractor with videos folder mounted
 	docker run -d --name $(AUDIO_EXTRACTOR_CONTAINER) --network $(NETWORK) -p 5001:5001 \
-		-v $(PWD)/videos:/app/videos \
+		-v $(PWD)/results/videos:/app/results/videos \
 		$(AUDIO_EXTRACTOR_IMAGE)
 
-	# Ждем пока Audio Extractor запустится
-	@echo "Ожидание запуска Audio Extractor..."
+	# Wait for Audio Extractor to start
+	@echo "Waiting for Audio Extractor to start..."
 	@until curl -s http://localhost:5001/extract >/dev/null; do sleep 1; done
 
-	# Запускаем Transcriber с монтированием папок videos и results
+	# Start Transcriber with videos and results folders mounted
 	docker run -d --name $(TRANSCRIBER_CONTAINER) --network $(NETWORK) -p 5002:5002 \
-		-v $(PWD)/videos:/app/videos \
+		-v $(PWD)/results/videos:/app/results/videos \
 		-v $(PWD)/results:/app/results \
 		$(TRANSCRIBER_IMAGE)
 
-	# Ждем пока Transcriber запустится
-	@echo "Ожидание запуска Transcriber..."
+	# Wait for Transcriber to start
+	@echo "Waiting for Transcriber to start..."
 	@until curl -s http://localhost:5002/transcribe >/dev/null; do sleep 1; done
 
-	# Запускаем Main Service с монтированием папок videos и results
-	docker run --name $(MAIN_SERVICE_CONTAINER) --network $(NETWORK) \
-		-v $(PWD)/videos:/app/videos \
+	# Start Downloader with videos and results folders mounted
+	docker run -d --name $(DOWNLOADER_CONTAINER) --network $(NETWORK) -p 5011:5011 \
+		-v $(PWD)/results/videos:/app/results/videos \
+		-v $(PWD)/results:/app/results \
+		$(DOWNLOADER_IMAGE)
+
+	# Wait for Downloader to start
+	@echo "Waiting for Downloader to start..."
+	@until curl -s http://localhost:5011/download >/dev/null; do sleep 1; done
+
+	# Start Main Service with videos and results folders mounted
+	docker run -d --name $(MAIN_SERVICE_CONTAINER) --network $(NETWORK) -p 8080:8080 \
+		-v $(PWD)/results/videos:/app/results/videos \
 		-v $(PWD)/results:/app/results \
 		$(MAIN_SERVICE_IMAGE)
 
-# Очистка контейнеров и образов
-clean:
-	docker rm -f $(AUDIO_EXTRACTOR_CONTAINER) || true
-	docker rm -f $(TRANSCRIBER_CONTAINER) || true
-	docker rm -f $(MAIN_SERVICE_CONTAINER) || true
-	docker network rm $(NETWORK) || true
-	docker rmi -f $(AUDIO_EXTRACTOR_IMAGE) $(TRANSCRIBER_IMAGE) $(MAIN_SERVICE_IMAGE) || true
+# Start all containers after building images
+run: build up
+
+# Stop and remove all containers
+down:
+	@docker stop $(AUDIO_EXTRACTOR_CONTAINER) $(TRANSCRIBER_CONTAINER) $(MAIN_SERVICE_CONTAINER) $(DOWNLOADER_CONTAINER) || true
+	@docker rm -f $(AUDIO_EXTRACTOR_CONTAINER) $(TRANSCRIBER_CONTAINER) $(MAIN_SERVICE_CONTAINER) $(DOWNLOADER_CONTAINER) || true
+
+# Clean up containers and images
+clean: down
+	@docker network rm $(NETWORK) || true
+	@docker rmi -f $(AUDIO_EXTRACTOR_IMAGE) $(TRANSCRIBER_IMAGE) $(MAIN_SERVICE_IMAGE) $(DOWNLOADER_CONTAINER) || true
+
+rerun-main:
+	docker stop $(MAIN_SERVICE_CONTAINER)
+	docker rm -f $(MAIN_SERVICE_CONTAINER)
+	@docker rmi -f $(MAIN_SERVICE_IMAGE) || true
+	docker build -t $(MAIN_SERVICE_IMAGE) ./main_service
+	# Start Main Service with videos and results folders mounted
+	docker run -d --name $(MAIN_SERVICE_CONTAINER) --network $(NETWORK) -p 8080:8080 \
+		-v $(PWD)/results/videos:/app/results/videos \
+		-v $(PWD)/results:/app/results \
+		$(MAIN_SERVICE_IMAGE)

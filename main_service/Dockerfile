@@ -1,33 +1,33 @@
 # main_service/Dockerfile
 
-# Используем официальный образ Go для сборки
+# Use the official Go image for building
 FROM golang:1.20 AS builder
 
 WORKDIR /app
 
-# Копируем go.mod и go.sum
+# Copy go.mod and go.sum
 COPY go.mod go.sum ./
 
-# Скачиваем зависимости
+# Download dependencies
 RUN go mod download
 
-# Копируем исходный код
+# Copy the source code
 COPY . .
 
-# Собираем бинарник
+# Build the binary
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main ./cmd/main.go
 
-# Финальный образ
+# Final image
 FROM alpine:latest
 
-# Изменено: установка рабочей директории на /app/
+# Changed: set the working directory to /app/
 WORKDIR /app/
 
-# Устанавливаем необходимые библиотеки
+# Install necessary libraries
 RUN apk add --no-cache ca-certificates
 
-# Копируем бинарник из билдера
+# Copy the binary from the builder
 COPY --from=builder /app/main .
 
-# Запускаем бинарник
+# Run the binary
 CMD ["./main"]

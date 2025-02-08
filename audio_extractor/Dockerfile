@@ -1,32 +1,32 @@
 # audio_extractor/Dockerfile
 
-# Этап сборки
+# Build stage
 FROM golang:1.20 AS builder
 
 WORKDIR /app
 
-# Копируем исходный код
+# Copy the source code
 COPY . .
 
-# Собираем бинарник
+# Build the binary
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o audio_extractor main.go
 
-# Финальный образ
+# Final image
 FROM alpine:latest
 
 WORKDIR /app
 
-# Устанавливаем ffmpeg
+# Install ffmpeg
 RUN apk add --no-cache ffmpeg
 
-# Копируем бинарник из билдера
+# Copy the binary from the builder
 COPY --from=builder /app/audio_extractor .
 
-# Устанавливаем права на выполнение
+# Set execution permissions
 RUN chmod +x ./audio_extractor
 
-# Определяем порт
+# Define the port
 EXPOSE 5001
 
-# Запускаем сервис
+# Run the service
 CMD ["./audio_extractor"]
