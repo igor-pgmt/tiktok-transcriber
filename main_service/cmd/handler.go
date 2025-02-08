@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+
 	"transcriber_project/main_service/internal/downloader"
 	"transcriber_project/main_service/internal/extractor"
 	"transcriber_project/main_service/internal/transcriber"
@@ -14,7 +15,7 @@ func NewHandler(downloaderClient *downloader.Client, extractorClient *extractor.
 		log.Println("Processing videos...")
 
 		// Process video files
-		utils.ProcessVideos(extractorClient, transcriberClient, downloaderClient, videosDir, outputCSVPath)
+		utils.ProcessVideos(extractorClient, transcriberClient, downloaderClient, videosDir, fileToDownload, outputCSVPath)
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Videos processed successfully"))
