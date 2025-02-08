@@ -1,7 +1,7 @@
 # transcriber/Dockerfile
 
 # Build stage
-FROM golang:1.20 AS builder
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ WORKDIR /app
 COPY . .
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o transcriber main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o transcriber *.go
 
 # Final image
 FROM python:3.9-slim
@@ -39,9 +39,6 @@ COPY --from=builder /app/transcriber .
 
 # Set execution permissions
 RUN chmod +x ./transcriber
-
-# Define the port
-EXPOSE 5002
 
 # Run the service
 CMD ["./transcriber"]
