@@ -1,0 +1,100 @@
+run:
+  go: '1.23'
+  modules-download-mode: readonly
+  allow-parallel-runners: true
+
+issues:
+  exclude-use-default: false
+  exclude-dirs:
+    - vendor
+
+output:
+  print-issued-lines: true
+  print-linter-name: true
+
+linters:
+  enable:
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - decorder
+    - dogsled
+    - dupl
+    - durationcheck
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - forbidigo
+    - forcetypeassert
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - godot
+    - gofmt
+    - gofumpt
+    - goheader
+    - goimports
+    - goprintffuncname
+    - gosimple
+    - govet
+    - grouper
+    - importas
+    - ineffassign
+    - ireturn
+    - loggercheck
+    - maintidx
+    - makezero
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnil
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - prealloc
+    - predeclared
+    - promlinter
+    - reassign
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - stylecheck
+    - tenv
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - wastedassign
+    - whitespace
+    - wrapcheck
+
+  disable:
+    - cyclop
+    - depguard
+    - funlen
+    - gocyclo
+    - godox
+    - gomoddirectives
+    - gomodguard
+    - gosec
+    - gci
+    - exhaustive
+    - exhaustruct
+    - lll
+    - nlreturn
+    - nonamedreturns
+    - paralleltest
+    - revive
+    - tagliatelle
+    - testpackage
+    - varnamelen
+    - wsl
+

@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
 	"transcriber_project/main_service/internal/downloader"
 	"transcriber_project/main_service/internal/extractor"
 	"transcriber_project/main_service/internal/transcriber"
 )
 
 const (
-	resultsDir    = "/app/results"
-	videosDir     = resultsDir + "/videos"
-	outputCSVPath = resultsDir + "/output.csv"
-	downloadLog   = resultsDir + "/downloaded.log"
+	resultsDir     = "/app/results"
+	videosDir      = resultsDir + "/videos"
+	outputCSVPath  = resultsDir + "/output.csv"
+	fileToDownload = resultsDir + "/download.txt"
+	downloadLog    = resultsDir + "/downloaded.log"
 )
 
 func main() {

@@ -104,3 +104,14 @@ rerun-main:
 		-v $(PWD)/results/videos:/app/results/videos \
 		-v $(PWD)/results:/app/results \
 		$(MAIN_SERVICE_IMAGE)
+
+lint: lint-audio-extractor lint-main-service lint-transcriber
+
+lint-audio-extractor:
+	golangci-lint run ./audio_extractor/*.go
+
+lint-main-service:
+	golangci-lint run ./main_service/...
+
+lint-transcriber:
+	golangci-lint run ./transcriber/*.go
