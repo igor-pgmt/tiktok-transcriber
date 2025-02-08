@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  main_service:
+    build:
+      context: .
+      dockerfile: main_service/Dockerfile
+    image: main_service_image
+    container_name: main_service_container
+    volumes:
+      - ./results:/results
+    ports:
+      - "8000:8000" # Измените по необходимости
+    restart: unless-stopped
