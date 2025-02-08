@@ -1,9 +1,9 @@
-# Игнорируем ненужные файлы и директории
+# Ignore unnecessary files and directories
 __pycache__
 *.pyc
 *.pyo
 *.pyd
 .env
 .DS_Store
-# Убедитесь, что videos НЕ игнорируется
+# Ensure that videos is NOT ignored
 # videos/
