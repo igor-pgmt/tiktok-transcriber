@@ -1,13 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
-
 	"transcriber_project/main_service/internal/downloader"
 	"transcriber_project/main_service/internal/extractor"
 	"transcriber_project/main_service/internal/transcriber"
-	"transcriber_project/main_service/internal/utils"
 )
 
 const (
@@ -18,24 +17,20 @@ const (
 )
 
 func main() {
-	log.Println("Starting Main Service...")
+	cfg := newConfig()
 
 	// Initialize service clients
-	downloaderClient := downloader.New("http://downloader_container:5011", videosDir, downloadLog)
-	extractorClient := extractor.New("http://audio_extractor_container:5001")
-	transcriberClient := transcriber.New("http://transcriber_container:5002")
+	downloaderClient := downloader.New(fmt.Sprintf("http://downloader_container:%s", cfg.DownloaderPort), videosDir, downloadLog)
+	extractorClient := extractor.New(fmt.Sprintf("http://audio_extractor_container:%s", cfg.AudioExtractorPort))
+	transcriberClient := transcriber.New(fmt.Sprintf("http://transcriber_container:%s", cfg.TranscriberPort))
+
+	mainHandler := NewHandler(downloaderClient, extractorClient, transcriberClient)
 
 	// Set up HTTP server
-	http.HandleFunc("/process-videos", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Processing videos...")
+	http.HandleFunc("/process-videos", mainHandler)
 
-		// Process video files
-		utils.ProcessVideos(extractorClient, transcriberClient, downloaderClient, videosDir, outputCSVPath)
-
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Videos processed successfully"))
-	})
-
-	// Start HTTP server on port 8080
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Printf("Main Service is running on port %s...", cfg.MainServicePort)
+	if err := http.ListenAndServe(":"+cfg.MainServicePort, nil); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }

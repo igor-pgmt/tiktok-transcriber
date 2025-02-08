@@ -1,7 +1,7 @@
 # audio_extractor/Dockerfile
 
 # Build stage
-FROM golang:1.20 AS builder
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ WORKDIR /app
 COPY . .
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o audio_extractor main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o audio_extractor *.go
 
 # Final image
 FROM alpine:latest
@@ -24,9 +24,6 @@ COPY --from=builder /app/audio_extractor .
 
 # Set execution permissions
 RUN chmod +x ./audio_extractor
-
-# Define the port
-EXPOSE 5001
 
 # Run the service
 CMD ["./audio_extractor"]
